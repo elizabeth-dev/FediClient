@@ -45,6 +45,18 @@ val profileFieldEntityListAdapter = object : ColumnAdapter<List<ProfileFieldEnti
 	}
 }
 
+val mapAdapter = object : ColumnAdapter<Map<String, Int>, String> {
+	override fun decode(databaseValue: String): Map<String, Int> {
+		val type = object : TypeToken<Map<String, Int>>() {}.type
+		return Gson().fromJson(databaseValue, type)
+	}
+
+	override fun encode(value: Map<String, Int>): String {
+		val type = object : TypeToken<Map<String, Int>>() {}.type
+		return Gson().toJson(value, type)
+	}
+}
+
 val instantAdapter = object : ColumnAdapter<Instant, Long> {
 	override fun decode(databaseValue: Long): Instant = Instant.ofEpochMilli(databaseValue)
 
@@ -79,7 +91,8 @@ object DatabaseModule {
 		), PostEntityAdapter = PostEntity.Adapter(
 			pollAdapter = pollEntityAdapter,
 			createdAtAdapter = instantAdapter,
-			updatedAtAdapter = instantAdapter
+			updatedAtAdapter = instantAdapter,
+			reactionsAdapter = mapAdapter,
 		), ProfileEntityAdapter = ProfileEntity.Adapter(
 			fieldsAdapter = profileFieldEntityListAdapter, createdAtAdapter = instantAdapter
 		),

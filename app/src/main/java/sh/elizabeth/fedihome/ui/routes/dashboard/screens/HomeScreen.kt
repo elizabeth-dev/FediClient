@@ -37,7 +37,10 @@ fun HomeScreen(
 		onReply = navToCompose,
 		onVotePoll = homeViewModel::votePoll,
 		navToPost = navToPost,
-		navToProfile = navToProfile
+		navToProfile = navToProfile,
+		onAddFavorite = homeViewModel::addFavorite,
+		onRemoveReaction = homeViewModel::removeReaction,
+		onAddReaction = homeViewModel::addReaction
 	)
 }
 
@@ -50,6 +53,9 @@ fun HomeScreen(
 	onVotePoll: (activeAccount: String, postId: String, pollId: String?, List<Int>) -> Unit,
 	navToPost: (String) -> Unit,
 	navToProfile: (String) -> Unit,
+	onAddFavorite: (activeAccount: String, postId: String) -> Unit,
+	onRemoveReaction: (activeAccount: String, postId: String) -> Unit,
+	onAddReaction: (activeAccount: String, postId: String, reaction: String) -> Unit,
 ) {
 	val pullRefreshState =
 		rememberPullRefreshState(uiState.isLoading, { onRefresh(uiState.activeAccount) })
@@ -77,9 +83,25 @@ fun HomeScreen(
 
 			is HomeUiState.HasPosts -> LazyColumn(Modifier.fillMaxSize()) {
 				items(uiState.posts) { post ->
-					SlimPostCard(post = post, onReply = onReply, onVotePoll = {
-						onVotePoll(uiState.activeAccount, post.id, post.poll?.id, it)
-					}, navToPost = navToPost, navToProfile = navToProfile)
+					SlimPostCard(
+						post = post,
+						onReply = onReply,
+						onVotePoll = {
+							onVotePoll(
+								uiState.activeAccount, post.id, post.poll?.id, it
+							)
+						},
+						navToPost = navToPost,
+						navToProfile = navToProfile,
+						onAddFavorite = { onAddFavorite(uiState.activeAccount, it) },
+						onRemoveReaction = { onRemoveReaction(uiState.activeAccount, it) },
+						onAddReaction = { postId, reaction ->
+							onAddReaction(
+								uiState.activeAccount,
+								postId,
+								reaction
+							)
+						})
 				}
 			}
 		}

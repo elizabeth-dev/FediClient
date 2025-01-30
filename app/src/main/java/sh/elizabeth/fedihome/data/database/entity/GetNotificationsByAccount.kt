@@ -35,7 +35,11 @@ fun GetNotificationByAccount.toDomain(emojiList: List<EmojiEntity>): Notificatio
 			emojis = emojis
 		) else null,
 		post = if (postId_ != null && profileId__ !== null) Post(
-			id = postId_, createdAt = createdAt__, updatedAt = updatedAt, cw = cw, text = text,
+			id = postId_,
+			createdAt = createdAt__,
+			updatedAt = updatedAt,
+			cw = cw,
+			text = text,
 			// author = author.toDomain(authorEmojis),
 			author = Profile(
 				id = profileId__,
@@ -55,7 +59,13 @@ fun GetNotificationByAccount.toDomain(emojiList: List<EmojiEntity>): Notificatio
 				headerUrl = headerUrl_,
 				headerBlur = headerBlur_,
 				emojis = emojis,
-			), emojis = emojis, repostedBy = null, quote = null, poll = poll?.toDomain()
+			),
+			emojis = emojis,
+			repostedBy = null,
+			quote = null,
+			poll = poll?.toDomain(),
+			reactions = reactions ?: emptyMap(),
+			myReaction = myReaction
 		) else null
 	)
 }

@@ -12,6 +12,8 @@ data class Post(
 	val repostedBy: Profile?,
 	val quote: Post?,
 	val poll: Poll?,
+	val reactions: Map<String, Int>,
+	val myReaction: String?,
 	val emojis: Map<String, Emoji>,
 )
 

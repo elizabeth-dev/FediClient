@@ -47,14 +47,15 @@ class PostRepository @Inject constructor(
 	suspend fun createPost(activeAccount: String, newPost: PostDraft) {
 		val instanceData = getInstanceAndEndpointAndTypeAndToken(activeAccount)
 
-		val postRes = postRemoteDataSource.createPost(
+		val posts = postRemoteDataSource.createPost(
 			instance = instanceData.instance,
 			endpoint = instanceData.endpoint,
 			instanceType = instanceData.instanceType,
 			token = instanceData.token,
 			newPost = newPost
-		)
-		insertOrReplace(postRes)
+		).unwrapQuotes()
+
+		handleInsertPosts(posts)
 	}
 
 	fun getPost(postId: String): Post? = postLocalDataSource.getPostSingle(postId)
@@ -63,19 +64,7 @@ class PostRepository @Inject constructor(
 
 	fun getPostsByProfileFlow(profileId: String) = postLocalDataSource.getPostsByProfile(profileId)
 
-	suspend fun fetchPost(
-		activeAccount: String,
-		postId: String,
-	) {
-		val instanceData = getInstanceAndEndpointAndTypeAndToken(activeAccount)
-
-		val posts = postRemoteDataSource.fetchPost(
-			instance = instanceData.instance,
-			endpoint = instanceData.endpoint,
-			instanceType = instanceData.instanceType,
-			token = instanceData.token,
-			postId = postId.split('@').first()
-		).unwrapQuotes()
+	private suspend fun handleInsertPosts(posts: List<Post>) {
 		val profiles = posts.flatMap { it.unwrapProfiles() }.toSet()
 		val emojis =
 			posts.flatMap { it.emojis.values }.plus(profiles.flatMap { it.emojis.values }).toSet()
@@ -111,6 +100,23 @@ class PostRepository @Inject constructor(
 		}
 	}
 
+	suspend fun fetchPost(
+		activeAccount: String,
+		postId: String,
+	) {
+		val instanceData = getInstanceAndEndpointAndTypeAndToken(activeAccount)
+
+		val posts = postRemoteDataSource.fetchPost(
+			instance = instanceData.instance,
+			endpoint = instanceData.endpoint,
+			instanceType = instanceData.instanceType,
+			token = instanceData.token,
+			postId = postId.split('@').first()
+		).unwrapQuotes()
+
+		handleInsertPosts(posts)
+	}
+
 	suspend fun fetchPostsByProfile(
 		activeAccount: String,
 		profileId: String,
@@ -124,41 +130,8 @@ class PostRepository @Inject constructor(
 			token = instanceData.token,
 			profileId = profileId.split('@').first()
 		).flatMap { it.unwrapQuotes() }
-		val profiles = posts.flatMap { it.unwrapProfiles() }.toSet()
-		val emojis =
-			posts.flatMap { it.emojis.values }.plus(profiles.flatMap { it.emojis.values }).toSet()
-		val postEmojiCrossRefs = posts.flatMap { post ->
-			post.emojis.values.map { emoji ->
-				PostEmojiCrossRef(
-					postId = post.id, emojiId = emoji.fullEmojiId
-				)
-			}
-		}
-		val profileEmojiCrossRefs = profiles.flatMap { profile ->
-			profile.emojis.values.map { emoji ->
-				ProfileEmojiCrossRef(
-					profileId = profile.id, emojiId = emoji.fullEmojiId
-				)
-			}
-		}
 
-		coroutineScope {
-			val emojiRef = async {
-				emojiLocalDataSource.insertOrReplace(*emojis.toTypedArray())
-			}
-
-			profileRepository.insert(*profiles.toTypedArray())
-			insertOrReplace(*posts.toTypedArray())
-
-			emojiRef.await()
-
-			val postEmojiRef =
-				async { postLocalDataSource.insertOrReplaceEmojiCrossRef(*postEmojiCrossRefs.toTypedArray()) }
-			val profileEmojiRef =
-				async { profileRepository.insertOrReplaceEmojiCrossRef(*profileEmojiCrossRefs.toTypedArray()) }
-
-			awaitAll(postEmojiRef, profileEmojiRef)
-		}
+		handleInsertPosts(posts)
 	}
 
 	suspend fun votePoll(
@@ -177,4 +150,39 @@ class PostRepository @Inject constructor(
 		)
 	}
 
+	suspend fun deleteReaction(
+		activeAccount: String,
+		postId: String,
+	) {
+		val instanceData = getInstanceAndEndpointAndTypeAndToken(activeAccount)
+
+		val posts = postRemoteDataSource.deleteReaction(
+			instanceData.endpoint,
+			instanceData.instance,
+			instanceData.instanceType,
+			instanceData.token,
+			postId.split('@').first()
+		).unwrapQuotes()
+
+		handleInsertPosts(posts)
+	}
+
+	suspend fun createReaction(
+		activeAccount: String,
+		postId: String,
+		emojiShortcode: String,
+	) {
+		val instanceData = getInstanceAndEndpointAndTypeAndToken(activeAccount)
+
+		val posts = postRemoteDataSource.createReaction(
+			instanceData.endpoint,
+			instanceData.instance,
+			instanceData.instanceType,
+			instanceData.token,
+			postId.split('@').first(),
+			emojiShortcode
+		).unwrapQuotes()
+
+		handleInsertPosts(posts)
+	}
 }

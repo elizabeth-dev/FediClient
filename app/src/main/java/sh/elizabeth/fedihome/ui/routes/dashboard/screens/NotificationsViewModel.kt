@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import sh.elizabeth.fedihome.data.repository.AuthRepository
 import sh.elizabeth.fedihome.data.repository.NotificationRepository
+import sh.elizabeth.fedihome.data.repository.PostRepository
 import sh.elizabeth.fedihome.domain.VotePollUseCase
 import sh.elizabeth.fedihome.model.Notification
 import javax.inject.Inject
@@ -59,6 +60,7 @@ class NotificationsViewModel @Inject constructor(
 	authRepository: AuthRepository,
 	private val notificationRepository: NotificationRepository,
 	private val votePollUseCase: VotePollUseCase,
+	private val postRepository: PostRepository,
 ) : ViewModel() {
 	private val viewModelState =
 		MutableStateFlow(NotificationsViewModelState(isLoading = true))
@@ -103,4 +105,21 @@ class NotificationsViewModel @Inject constructor(
 		}
 	}
 
+	fun addFavorite(activeAccount: String, postId: String) {
+		viewModelScope.launch {
+			postRepository.createReaction(activeAccount, postId, "⭐")
+		}
+	}
+
+	fun removeReaction(activeAccount: String, postId: String) {
+		viewModelScope.launch {
+			postRepository.deleteReaction(activeAccount, postId)
+		}
+	}
+
+	fun addReaction(activeAccount: String, postId: String, reaction: String) {
+		viewModelScope.launch {
+			postRepository.createReaction(activeAccount, postId, reaction)
+		}
+	}
 }

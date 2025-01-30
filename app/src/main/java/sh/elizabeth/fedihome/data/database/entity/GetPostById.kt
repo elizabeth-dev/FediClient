@@ -63,8 +63,12 @@ fun GetPostById.toPostDomain(emojiList: List<EmojiEntity>): Post {
 			quote = null,
 			poll = poll_?.toDomain(),
 			emojis = emojis,
+			reactions = reactions ?: emptyMap(),
+			myReaction = myReaction
 		) else null,
 		poll = poll?.toDomain(),
 		emojis = emojis,
+		reactions = reactions ?: emptyMap(),
+		myReaction = myReaction
 	)
 }

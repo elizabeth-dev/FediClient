@@ -70,7 +70,7 @@ class ProfileViewModel @Inject constructor(
 	private val votePollUseCase: VotePollUseCase,
 	private val refreshProfileAndPostsUseCase: RefreshProfileAndPostsUseCase,
 	private val profileRepository: ProfileRepository,
-	postRepository: PostRepository,
+	private val postRepository: PostRepository,
 	authRepository: AuthRepository,
 	savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -116,6 +116,24 @@ class ProfileViewModel @Inject constructor(
 	fun votePoll(activeAccount: String, postId: String, pollId: String?, choices: List<Int>) {
 		viewModelScope.launch {
 			votePollUseCase(activeAccount, postId, pollId, choices)
+		}
+	}
+
+	fun addFavorite(activeAccount: String, postId: String) {
+		viewModelScope.launch {
+			postRepository.createReaction(activeAccount, postId, "⭐")
+		}
+	}
+
+	fun removeReaction(activeAccount: String, postId: String) {
+		viewModelScope.launch {
+			postRepository.deleteReaction(activeAccount, postId)
+		}
+	}
+
+	fun addReaction(activeAccount: String, postId: String, reaction: String) {
+		viewModelScope.launch {
+			postRepository.createReaction(activeAccount, postId, reaction)
 		}
 	}
 }

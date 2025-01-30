@@ -1,4 +1,7 @@
 import java.time.Instant;
+import kotlin.Int;
+import kotlin.String;
+import kotlin.collections.Map;
 import sh.elizabeth.fedihome.data.database.entity.PollEntity;
 
 CREATE TABLE PostEntity (
@@ -10,6 +13,8 @@ CREATE TABLE PostEntity (
     authorId TEXT NOT NULL,
     quoteId TEXT,
     poll TEXT AS PollEntity,
+    reactions TEXT AS Map<String, Int>,
+    myReaction TEXT,
     FOREIGN KEY (authorId) REFERENCES ProfileEntity(profileId),
     FOREIGN KEY (quoteId) REFERENCES PostEntity(postId)
 );

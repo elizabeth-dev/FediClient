@@ -35,6 +35,9 @@ fun PostRoute(
 		onReply = navToCompose,
 		onVotePoll = postViewModel::votePoll,
 		navToProfile = navToProfile,
+		onAddFavorite = postViewModel::addFavorite,
+		onRemoveReaction = postViewModel::removeReaction,
+		onAddReaction = postViewModel::addReaction,
 	)
 }
 
@@ -47,28 +50,27 @@ fun PostRoute(
 	onReply: (String) -> Unit,
 	onVotePoll: (activeAccount: String, postId: String, pollId: String?, List<Int>) -> Unit,
 	navToProfile: (profileId: String) -> Unit,
+	onAddFavorite: (String, String) -> Unit,
+	onRemoveReaction: (String, String) -> Unit,
+	onAddReaction: (String, String, String) -> Unit,
 ) {
 	LaunchedEffect(key1 = uiState.activeAccount, key2 = uiState.postId) {
 		if (uiState.activeAccount.isNotBlank()) onPostRefresh(
-			uiState.activeAccount,
-			uiState.postId
+			uiState.activeAccount, uiState.postId
 		)
 	}
 
 	Scaffold(topBar = {
 		TopAppBar(title = {
 			Text(
-				text = "Post",
-				maxLines = 1,
-				overflow = TextOverflow.Ellipsis
+				text = "Post", maxLines = 1, overflow = TextOverflow.Ellipsis
 			)
 		}, navigationIcon = {
 			IconButton(
 				onClick = navBack
 			) {
 				Icon(
-					Icons.AutoMirrored.Outlined.ArrowBack,
-					contentDescription = "Back"
+					Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back"
 				)
 			}
 		})
@@ -79,7 +81,10 @@ fun PostRoute(
 			contentPadding = contentPadding,
 			onReply = onReply,
 			onVotePoll = onVotePoll,
-			navToProfile = navToProfile
+			navToProfile = navToProfile,
+			onAddFavorite = onAddFavorite,
+			onRemoveReaction = onRemoveReaction,
+			onAddReaction = onAddReaction,
 		)
 
 	}
@@ -90,16 +95,17 @@ fun PostRoute(
 @Composable
 fun PostRoutePreview() {
 	FediHomeTheme {
-		PostRoute(uiState = PostUiState.HasPost(
-			postId = "foo",
-			post = defaultPost,
-			activeAccount = "foo",
-			isLoading = false
+		PostRoute(
+			uiState = PostUiState.HasPost(
+				postId = "foo", post = defaultPost, activeAccount = "foo", isLoading = false
 		),
 			navBack = {},
 			onPostRefresh = { _, _ -> },
 			onReply = {},
 			onVotePoll = { _, _, _, _ -> },
-			navToProfile = {})
+			navToProfile = {},
+			onAddFavorite = { _, _ -> },
+			onRemoveReaction = { _, _ -> },
+			onAddReaction = { _, _, _ -> })
 	}
 }

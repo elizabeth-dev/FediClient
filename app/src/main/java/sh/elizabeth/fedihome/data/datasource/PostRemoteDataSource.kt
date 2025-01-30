@@ -110,4 +110,64 @@ class PostRemoteDataSource @Inject constructor(
 			endpoint = endpoint, token = token, pollId = pollId, choices = choices
 		)
 	}
+
+	suspend fun deleteReaction(
+		endpoint: String,
+		instance: String,
+		instanceType: SupportedInstances,
+		token: String,
+		postId: String,
+	): Post = when (instanceType) {
+		SupportedInstances.ICESHRIMP, SupportedInstances.SHARKEY -> coroutineScope {
+			postIceshrimpApi.deleteReaction(
+				endpoint = endpoint, token = token, postId = postId
+			)
+
+			if (instanceType == SupportedInstances.SHARKEY) {
+				return@coroutineScope postSharkeyApi.fetchPost(
+					endpoint = endpoint, token = token, postId = postId
+				).toDomain(instance)
+			}
+
+			return@coroutineScope postIceshrimpApi.fetchPost(
+				endpoint = endpoint, token = token, postId = postId
+			).toDomain(instance)
+		}
+
+		SupportedInstances.GLITCH,
+		SupportedInstances.MASTODON,
+			-> postMastodonApi.deleteFavorite(endpoint = endpoint, token = token, postId = postId)
+			.toDomain(instance)
+	}
+
+	suspend fun createReaction(
+		endpoint: String,
+		instance: String,
+		instanceType: SupportedInstances,
+		token: String,
+		postId: String,
+		emojiShortcode: String,
+	): Post = when (instanceType) {
+		SupportedInstances.ICESHRIMP, SupportedInstances.SHARKEY -> coroutineScope {
+			postIceshrimpApi.createReaction(
+				endpoint = endpoint, token = token, postId = postId, emojiShortcode = emojiShortcode
+			)
+
+			if (instanceType == SupportedInstances.SHARKEY) {
+				return@coroutineScope postSharkeyApi.fetchPost(
+					endpoint = endpoint, token = token, postId = postId
+				).toDomain(instance)
+			}
+
+			return@coroutineScope postIceshrimpApi.fetchPost(
+				endpoint = endpoint, token = token, postId = postId
+			).toDomain(instance)
+		}
+
+		SupportedInstances.GLITCH,
+		SupportedInstances.MASTODON,
+			-> postMastodonApi.createFavorite(
+			endpoint = endpoint, token = token, postId = postId
+		).toDomain(instance)
+	}
 }

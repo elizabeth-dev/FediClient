@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import sh.elizabeth.fedihome.data.repository.AuthRepository
+import sh.elizabeth.fedihome.data.repository.PostRepository
 import sh.elizabeth.fedihome.data.repository.TimelineRepository
 import sh.elizabeth.fedihome.domain.RefreshTimelineUseCase
 import sh.elizabeth.fedihome.domain.VotePollUseCase
@@ -60,6 +61,7 @@ class HomeViewModel @Inject constructor(
 	authRepository: AuthRepository,
 	private val refreshTimelineUseCase: RefreshTimelineUseCase,
 	private val votePollUseCase: VotePollUseCase,
+	private val postRepository: PostRepository,
 ) : ViewModel() {
 	private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
 
@@ -94,6 +96,24 @@ class HomeViewModel @Inject constructor(
 	fun votePoll(profileIdentifier: String, postId: String, pollId: String?, choices: List<Int>) {
 		viewModelScope.launch {
 			votePollUseCase(profileIdentifier, postId, pollId, choices)
+		}
+	}
+
+	fun addFavorite(activeAccount: String, postId: String) {
+		viewModelScope.launch {
+			postRepository.createReaction(activeAccount, postId, "⭐")
+		}
+	}
+
+	fun removeReaction(activeAccount: String, postId: String) {
+		viewModelScope.launch {
+			postRepository.deleteReaction(activeAccount, postId)
+		}
+	}
+
+	fun addReaction(activeAccount: String, postId: String, reaction: String) {
+		viewModelScope.launch {
+			postRepository.createReaction(activeAccount, postId, reaction)
 		}
 	}
 }

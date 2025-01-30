@@ -23,9 +23,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import sh.elizabeth.fedihome.model.Emoji
+import sh.elizabeth.fedihome.util.DEFAULT_EMOJI_SIZE
 import java.util.regex.Pattern
 
 val contentPattern =
@@ -37,7 +37,7 @@ val contentRegex = Pattern.compile(contentPattern)
 fun EnrichedText(
 	text: String,
 	modifier: Modifier = Modifier,
-	emojiSize: TextUnit = 24.sp,
+	emojiSize: TextUnit = DEFAULT_EMOJI_SIZE,
 	emojis: Map<String, Emoji> = emptyMap(),
 	overflow: TextOverflow = TextOverflow.Clip,
 	softWrap: Boolean = true,

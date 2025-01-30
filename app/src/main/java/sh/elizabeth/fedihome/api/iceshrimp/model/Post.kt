@@ -56,6 +56,8 @@ data class Post(
 	val uri: String? = null,
 	val url: String? = null,
 	val myReaction: String? = null,
+	val isRenoted: Boolean? = false,
+	val isFiltered: Boolean? = false,
 )
 
 // Needs to have text, poll, files, or maybe a reply?
@@ -74,8 +76,16 @@ fun Post.toDomain(fetchedFromInstance: String): DomainPost {
 			repostedBy = user.toDomain(fetchedFromInstance),
 			quote = renote.renote?.toDomain(fetchedFromInstance),
 			poll = renote.poll?.toDomain(),
-			// TODO: Add reaction emojis
-			emojis = renote.emojis.associate { Pair(it.name, it.toDomain(fetchedFromInstance)) },
+			emojis = renote.emojis.plus(renote.reactionEmojis)
+				.associate { Pair(it.name, it.toDomain(fetchedFromInstance)) },
+			reactions = renote.reactions.mapKeys {
+				if (it.key.startsWith(':') && it.key.endsWith(':')) it.key.trim(
+					':'
+				) else it.key
+			},
+			myReaction = renote.myReaction.let {
+				if (it != null && it.startsWith(':') && it.endsWith(':')) it.trim(':') else it
+			},
 		)
 	}
 	return DomainPost(
@@ -88,8 +98,16 @@ fun Post.toDomain(fetchedFromInstance: String): DomainPost {
 		repostedBy = null,
 		quote = renote?.toDomain(fetchedFromInstance),
 		poll = poll?.toDomain(),
-		// TODO: Add reaction emojis
-		emojis = emojis.associate { Pair(it.name, it.toDomain(fetchedFromInstance)) },
+		emojis = emojis.plus(reactionEmojis)
+			.associate { Pair(it.name, it.toDomain(fetchedFromInstance)) },
+		reactions = reactions.mapKeys {
+			if (it.key.startsWith(':') && it.key.endsWith(':')) it.key.trim(
+				':'
+			) else it.key
+		},
+		myReaction = myReaction.let {
+			if (it != null && it.startsWith(':') && it.endsWith(':')) it.trim(':') else it
+		},
 	)
 }
 
@@ -109,7 +127,8 @@ data class PollChoice(
 )
 
 fun Poll.toDomain() = DomainPoll(
-	id = null, voted = choices.any { it.isVoted },
+	id = null,
+	voted = choices.any { it.isVoted },
 	multiple = multiple,
 	expiresAt = expiresAt,
 	choices = choices.map {

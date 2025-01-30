@@ -72,8 +72,15 @@ fun Post.toDomain(fetchedFromInstance: String): sh.elizabeth.fedihome.model.Post
 			repostedBy = user.toDomain(fetchedFromInstance),
 			quote = renote.renote?.toDomain(fetchedFromInstance),
 			poll = renote.poll?.toDomain(),
-			// TODO: Add reaction emojis
-			emojis = renote.emojis.toDomainMap(fetchedFromInstance),
+			emojis = renote.emojis.plus(renote.reactionEmojis).toDomainMap(fetchedFromInstance),
+			reactions = renote.reactions.mapKeys {
+				if (it.key.startsWith(':') && it.key.endsWith(':')) it.key.trim(
+					':'
+				) else it.key
+			},
+			myReaction = renote.myReaction.let {
+				if (it != null && it.startsWith(':') && it.endsWith(':')) it.trim(':') else it
+			},
 		)
 	}
 	return sh.elizabeth.fedihome.model.Post(
@@ -86,8 +93,15 @@ fun Post.toDomain(fetchedFromInstance: String): sh.elizabeth.fedihome.model.Post
 		repostedBy = null,
 		quote = renote?.toDomain(fetchedFromInstance),
 		poll = poll?.toDomain(),
-		// TODO: Add reaction emojis
-		emojis = emojis.toDomainMap(fetchedFromInstance),
+		emojis = emojis.plus(reactionEmojis).toDomainMap(fetchedFromInstance),
+		reactions = reactions.mapKeys {
+			if (it.key.startsWith(':') && it.key.endsWith(':')) it.key.trim(
+				':'
+			) else it.key
+		},
+		myReaction = myReaction.let {
+			if (it != null && it.startsWith(':') && it.endsWith(':')) it.trim(':') else it
+		},
 	)
 }
 
@@ -107,7 +121,8 @@ data class PollChoice(
 )
 
 fun Poll.toDomain() = sh.elizabeth.fedihome.model.Poll(
-	id = null, voted = choices.any { it.isVoted },
+	id = null,
+	voted = choices.any { it.isVoted },
 	multiple = multiple,
 	expiresAt = expiresAt,
 	choices = choices.map {

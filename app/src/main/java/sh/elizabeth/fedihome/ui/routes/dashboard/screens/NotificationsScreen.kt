@@ -38,7 +38,10 @@ fun NotificationsScreen(
 		onReply = navToCompose,
 		onVotePoll = notificationsViewModel::votePoll,
 		navToPost = navToPost,
-		navToProfile = navToProfile
+		navToProfile = navToProfile,
+		onAddFavorite = notificationsViewModel::addFavorite,
+		onRemoveReaction = notificationsViewModel::removeReaction,
+		onAddReaction = notificationsViewModel::addReaction,
 	)
 }
 
@@ -51,6 +54,9 @@ fun NotificationsScreen(
 	navToProfile: (String) -> Unit,
 	onReply: (String) -> Unit,
 	onVotePoll: (activeAccount: String, postId: String, pollId: String?, List<Int>) -> Unit,
+	onAddFavorite: (String, String) -> Unit,
+	onRemoveReaction: (String, String) -> Unit,
+	onAddReaction: (String, String, String) -> Unit,
 ) {
 	val pullRefreshState =
 		rememberPullRefreshState(uiState.isLoading, { onRefresh(uiState.activeAccount) })
@@ -89,6 +95,13 @@ fun NotificationsScreen(
 									notification.post?.id!!,
 									notification.post.poll?.id,
 									it
+								)
+							},
+							onAddFavorite = { onAddFavorite(uiState.activeAccount, it) },
+							onRemoveReaction = { onRemoveReaction(uiState.activeAccount, it) },
+							onAddReaction = { postId, reaction ->
+								onAddReaction(
+									uiState.activeAccount, postId, reaction
 								)
 							})
 					}

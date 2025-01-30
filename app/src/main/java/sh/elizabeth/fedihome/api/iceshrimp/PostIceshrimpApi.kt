@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import sh.elizabeth.fedihome.api.iceshrimp.model.CreatePostRequest
 import sh.elizabeth.fedihome.api.iceshrimp.model.CreatePostResponse
+import sh.elizabeth.fedihome.api.iceshrimp.model.CreateReactionRequest
 import sh.elizabeth.fedihome.api.iceshrimp.model.GetPostsByProfile
 import sh.elizabeth.fedihome.api.iceshrimp.model.PollVoteRequest
 import sh.elizabeth.fedihome.api.iceshrimp.model.Post
@@ -53,6 +54,36 @@ class PostIceshrimpApi @Inject constructor(private val httpClient: HttpClient) {
 			contentType(ContentType.Application.Json)
 			bearerAuth(token)
 			setBody(PollVoteRequest(noteId = postId.split('@').first(), choice = choice))
+		}
+	}
+
+	suspend fun createReaction(
+		endpoint: String,
+		token: String,
+		postId: String,
+		emojiShortcode: String
+	) {
+		httpClient.post(
+			"https://$endpoint/api/notes/reactions/create"
+		) {
+			contentType(ContentType.Application.Json)
+			bearerAuth(token)
+			setBody(
+				CreateReactionRequest(
+					noteId = postId.split('@').first(),
+					reaction = emojiShortcode
+				)
+			)
+		}
+	}
+
+	suspend fun deleteReaction(endpoint: String, token: String, postId: String) {
+		httpClient.post(
+			"https://$endpoint/api/notes/reactions/delete"
+		) {
+			contentType(ContentType.Application.Json)
+			bearerAuth(token)
+			setBody(SelectPostRequest(noteId = postId.split('@').first()))
 		}
 	}
 }

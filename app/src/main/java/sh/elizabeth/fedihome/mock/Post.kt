@@ -21,9 +21,12 @@ val defaultPost = Post(
 		repostedBy = null,
 		poll = defaultPoll,
 		emojis = emptyMap(),
-
-		),
+		reactions = emptyMap(),
+		myReaction = null,
+	),
 	repostedBy = defaultProfile,
 	poll = defaultPoll,
 	emojis = emptyMap(),
+	reactions = emptyMap(),
+	myReaction = null,
 )

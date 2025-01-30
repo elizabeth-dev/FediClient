@@ -3,6 +3,7 @@ package sh.elizabeth.fedihome.api.mastodon.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import sh.elizabeth.fedihome.model.PollChoice
+import sh.elizabeth.fedihome.util.DEFAULT_FAVORITE_EMOJI
 import sh.elizabeth.fedihome.util.InstantAsString
 import sh.elizabeth.fedihome.model.Poll as DomainPoll
 import sh.elizabeth.fedihome.model.Post as DomainPost
@@ -53,6 +54,8 @@ fun Post.toDomain(fetchedFromInstance: String): DomainPost {
 			repostedBy = account.toDomain(fetchedFromInstance),
 			quote = null,
 			poll = reblog.poll?.toDomain(),
+			reactions = mapOf(DEFAULT_FAVORITE_EMOJI to reblog.favourites_count),
+			myReaction = if (reblog.favourited) DEFAULT_FAVORITE_EMOJI else null,
 			emojis = reblog.emojis.associate {
 				Pair(
 					it.shortcode, it.toDomain(fetchedFromInstance)
@@ -72,6 +75,8 @@ fun Post.toDomain(fetchedFromInstance: String): DomainPost {
 		quote = null,
 		poll = poll?.toDomain(),
 		emojis = emojis.associate { Pair(it.shortcode, it.toDomain(fetchedFromInstance)) },
+		reactions = mapOf(DEFAULT_FAVORITE_EMOJI to favourites_count),
+		myReaction = if (favourited) DEFAULT_FAVORITE_EMOJI else null,
 	)
 }
 
@@ -124,7 +129,8 @@ data class Poll(
 	@SerialName("own_votes") val ownVotes: List<Int>,
 )
 
-fun Poll.toDomain() = DomainPoll(id = id,
+fun Poll.toDomain() = DomainPoll(
+	id = id,
 	voted = voted,
 	multiple = multiple,
 	expiresAt = expiresAt,

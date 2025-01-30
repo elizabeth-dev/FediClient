@@ -1,5 +1,6 @@
 package sh.elizabeth.fedihome.util
 
+import androidx.compose.ui.unit.sp
 import kotlinx.serialization.SerialName
 
 const val APP_NAME = "Test Fedi Client"
@@ -56,3 +57,6 @@ enum class SupportedInstances {
 	@SerialName("glitch-soc")
 	GLITCH,
 }
+
+val DEFAULT_EMOJI_SIZE = 24.sp
+const val DEFAULT_FAVORITE_EMOJI = "⭐"

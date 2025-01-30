@@ -40,7 +40,10 @@ fun ProfileRoute(
 		onReply = navToCompose,
 		onVotePoll = profileViewModel::votePoll,
 		navToPost = navToPost,
-		navToProfile = navToProfile
+		navToProfile = navToProfile,
+		onAddFavorite = profileViewModel::addFavorite,
+		onRemoveReaction = profileViewModel::removeReaction,
+		onAddReaction = profileViewModel::addReaction,
 	)
 }
 
@@ -54,6 +57,9 @@ fun ProfileRoute(
 	onVotePoll: (activeAccount: String, postId: String, pollId: String?, List<Int>) -> Unit,
 	navToPost: (String) -> Unit,
 	navToProfile: (String) -> Unit,
+	onAddFavorite: (String, String) -> Unit,
+	onRemoveReaction: (String, String) -> Unit,
+	onAddReaction: (String, String, String) -> Unit,
 ) {
 	LaunchedEffect(
 		key1 = uiState.profileTag,
@@ -92,7 +98,10 @@ fun ProfileRoute(
 			onReply = onReply,
 			onVotePoll = onVotePoll,
 			navToPost = navToPost,
-			navToProfile = navToProfile
+			navToProfile = navToProfile,
+			onAddReaction = onAddReaction,
+			onAddFavorite = onAddFavorite,
+			onRemoveReaction = onRemoveReaction,
 		)
 	}
 }
@@ -113,6 +122,9 @@ fun ProfileRoutePreview() {
 			onReply = {},
 			onVotePoll = { _, _, _, _ -> },
 			navToPost = {},
-			navToProfile = {})
+			navToProfile = {},
+			onAddFavorite = { _, _ -> },
+			onRemoveReaction = { _, _ -> },
+			onAddReaction = { _, _, _ -> })
 	}
 }

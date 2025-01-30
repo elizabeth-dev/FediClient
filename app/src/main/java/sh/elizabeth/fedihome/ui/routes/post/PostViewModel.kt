@@ -5,7 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import sh.elizabeth.fedihome.MainDestinations
 import sh.elizabeth.fedihome.data.repository.AuthRepository
@@ -76,6 +80,24 @@ class PostViewModel @Inject constructor(
 	fun votePoll(activeAccount: String, postId: String, pollId: String?, choices: List<Int>) {
 		viewModelScope.launch {
 			votePollUseCase(activeAccount, postId, pollId, choices)
+		}
+	}
+
+	fun addFavorite(activeAccount: String, postId: String) {
+		viewModelScope.launch {
+			postRepository.createReaction(activeAccount, postId, "⭐")
+		}
+	}
+
+	fun removeReaction(activeAccount: String, postId: String) {
+		viewModelScope.launch {
+			postRepository.deleteReaction(activeAccount, postId)
+		}
+	}
+
+	fun addReaction(activeAccount: String, postId: String, reaction: String) {
+		viewModelScope.launch {
+			postRepository.createReaction(activeAccount, postId, reaction)
 		}
 	}
 }
